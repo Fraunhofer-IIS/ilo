@@ -1,0 +1,4 @@
+include/ilo/version.h
+*.pyc
+test_package/build/
+.DS_Store
