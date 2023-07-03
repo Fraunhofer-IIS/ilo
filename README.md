@@ -2,7 +2,7 @@
 
 ilo is a collection of helpful datatypes and algorithms.
 
-For additional information, please have a look at the [Wiki](https://github.com/Fraunhofer-IIS/ilo/-/wikis/home).
+For additional information, please have a look at the [Wiki](https://github.com/Fraunhofer-IIS/ilo/wiki/home).
 
 ## Supported architectures
 
@@ -110,7 +110,7 @@ The following project-specific CMake parameters are available:
 
 ### How to build using CMake
 
-Find below the basic instructions to build the project or visit the ["Wiki Build"](https://github.com/Fraunhofer-IIS/ilo/-/wikis/Build) page(s) to get further information (additional build parameters and platform specific build instructions).
+Find below the basic instructions to build the project or visit the ["Wiki Build"](https://github.com/Fraunhofer-IIS/ilo/wiki/Build) page(s) to get further information (additional build parameters and platform specific build instructions).
 
 1. Clone the project and make a build folder.
    ```
