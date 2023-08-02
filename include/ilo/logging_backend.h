@@ -168,7 +168,8 @@ inline void print_log_system(const line_type& line, const char* Component, const
 
 #ifdef __EMSCRIPTEN__
 template <class line_type>
-inline void print_log_system(const line_type& line, const char* Component, const char* Category) {
+inline void print_log_system(const line_type& line, const char* /*Component*/,
+                             const char* Category) {
   if (*Category == 'I') {
     std::cout << line.data();
   } else if (*Category == 'W') {
@@ -378,6 +379,11 @@ inline void log_function(const char* Component, const char* Category, const char
   line_type line;
   int write_at = 0;
 
+  if (CLogger::instance().isLoggingDisabled()) {
+    // Skip assembling the log message if it is not going to be written
+    return;
+  }
+
   bool success = add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
                  add_component_category(line, write_at, Component, Category);
 
@@ -417,6 +423,11 @@ inline bool log_assert(const char* component, const char* predicate, const char*
   using namespace std;
   line_type line;
   int write_at = 0;
+
+  if (CLogger::instance().isLoggingDisabled()) {
+    // Skip assembling the log message if it is not going to be written
+    return true;
+  }
 
   bool success = add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
                  add_component_category(line, write_at, component, "E");
@@ -465,7 +476,7 @@ struct ScopeLogger {
   bool add_brackets(LineType& line, int& write_at) const;
   bool add_closing(LineType& line, int& write_at) const;
   void print_entry(const char* format, va_list args) const;
-  virtual void print_exit() const;
+  void print_exit() const;
 
  protected:
   const char* comp;
@@ -503,6 +514,11 @@ struct ScopeLoggerRet : ScopeLogger {
   template <class line_type = LineType>
   void print_exit() const {
     line_type line;
+
+    if (CLogger::instance().isLoggingDisabled()) {
+      // Skip assembling the log message if it is not going to be written
+      return;
+    }
 
     int write_at = 0;
     add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
