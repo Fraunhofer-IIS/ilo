@@ -125,16 +125,6 @@ amm-info@iis.fraunhofer.de
 #include "ilo/version.h"
 #include "ilo/async_fileio.h"
 
-#if __cplusplus >= 201402L
-#define ILO_DEPRECATED [[deprecated]]
-#elif defined(__GNUC__) || defined(__clang__)
-#define ILO_DEPRECATED __attribute__((deprecated))
-#elif defined(_MSC_VER)
-#define ILO_DEPRECATED __declspec(deprecated)
-#else
-#define ILO_DEPRECATED
-#endif
-
 using LineType = std::array<char, 512>;
 
 #ifdef _WIN32
@@ -249,8 +239,6 @@ class CLogger {
   void redirect_to_system_log();
   //! Disable logging output
   void disable_logging();
-  //! Deprecated, remove in ilo v3
-  ILO_DEPRECATED void print(const char* format, ...);
   //! Log content to the currently selected logger system
   void log(const char* line);
   //! Query if system logger is currently selected
@@ -597,5 +585,3 @@ ScopeLoggerRet<retval> make_ScopeLoggerRet(const char* component, retval& ret, c
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-
-#undef ILO_DEPRECATED

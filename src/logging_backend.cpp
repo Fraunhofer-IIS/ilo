@@ -128,17 +128,6 @@ void CLogger::disable_logging() {
   m_disableLogging.store(true);
 }
 
-void CLogger::print(const char* format, ...) {
-  ILO_ASSERT(std::string(format) == "%s\n", "Disallowed usage of CLogger::print.");
-
-  va_list args;
-  va_start(args, format);
-  const char* line = va_arg(args, const char*);
-  va_end(args);
-
-  log(line);
-}
-
 void CLogger::log(const char* line) {
   if (m_fileWriter) {
     m_fileWriter->writeAsync(std::string(line) + '\n');
