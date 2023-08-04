@@ -89,6 +89,7 @@ amm-info@iis.fraunhofer.de
 
 // System includes
 #include <iostream>
+#include <type_traits>
 
 // Internal includes
 #include "ilo/common_types.h"
@@ -168,7 +169,7 @@ class CBitParser {
    * buffers with overhead at the end of the buffer. If 0, the whole buffer is considered to contain
    * valid data.
    */
-  CBitParser(const ByteBuffer& externalBuffer, const uint32_t nofValidBits = 0);
+  CBitParser(const ByteBuffer& externalBuffer, uint32_t nofValidBits = 0);
 
   /*!
    * @brief Create parser from begin iterator and buffer length
@@ -181,7 +182,7 @@ class CBitParser {
    * buffers with overhead at the end of the buffer. If 0, the whole buffer is considered to contain
    * valid data.
    */
-  CBitParser(ByteBuffer::const_iterator& begin, const size_t size, const uint32_t nofValidBits = 0);
+  CBitParser(ByteBuffer::const_iterator& begin, size_t size, uint32_t nofValidBits = 0);
 
   /*!
    * @brief Create parser from begin and end iterator
@@ -195,7 +196,7 @@ class CBitParser {
    * valid data.
    */
   CBitParser(ByteBuffer::const_iterator& begin, const ByteBuffer::const_iterator& end,
-             const uint32_t nofValidBits = 0);
+             uint32_t nofValidBits = 0);
 
   /*!
    * @brief Create parser from a data pointer
@@ -209,7 +210,7 @@ class CBitParser {
    * @note nofValidBits shall never be 0 or bigger than the amount of bits available behind the data
    * pointer.
    */
-  CBitParser(uint8_t* buffer, const uint32_t nofValidBits);
+  CBitParser(uint8_t* buffer, uint32_t nofValidBits);
 
   /*!
    * @brief Frees all self allocated memory
@@ -230,7 +231,7 @@ class CBitParser {
    * This function needs to be called with a matching set of how many bits to read and in what
    * format.
    *
-   * @param nofBits number of bits to read
+   * @param nnofBits number of bits to read
    * @return Primitive of type T containing the read bits
    *
    * @note The chosen format type must be greater or equal to the number of bits read.
@@ -244,10 +245,9 @@ class CBitParser {
    * int8_t data = parser.read<int8_t>(6);
    * @endcode
    */
-  template <typename T, typename = uint8_t, typename = uint16_t, typename = uint32_t,
-            typename = uint64_t, typename = int8_t, typename = int16_t, typename = int32_t,
-            typename = int64_t>
+  template <typename T>
   T read(uint32_t nnofBits) {
+    static_assert(std::is_integral<T>::value, "Can only read integer types");
     iloAssertWithReadException(nnofBits <= nofBitsLeft(), "Not enough data left to parse.");
 
     if (nnofBits == 0) {

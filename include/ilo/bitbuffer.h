@@ -90,6 +90,7 @@ amm-info@iis.fraunhofer.de
 // System includes
 #include <vector>
 #include <iostream>
+#include <type_traits>
 
 // Internal includes
 #include "ilo/bitparser.h"
@@ -239,9 +240,11 @@ class CBitBuffer {
    * @param toWrite Value to write into the buffer
    * @param nnofBits Number of bits to write
    */
-  template <typename T, typename = uint8_t, typename = uint16_t, typename = uint32_t,
-            typename = uint64_t>
+  template <typename T>
   void write(T toWrite, uint32_t nnofBits) {
+    static_assert(
+        std::is_integral<T>::value && std::is_unsigned<T>::value && !std::is_same<T, bool>::value,
+        "Can only write unsigned integer types");
     if (m_useExtBuffer) {
       iloAssertWithWriteException(
           m_extBufferSizeBytes * 8u >= tell() + nnofBits,
@@ -289,9 +292,11 @@ class CBitBuffer {
    * @param before Integer position of the bit right behind the insertion point
    * @param nnofBits Number of bits to insert
    */
-  template <typename T, typename = uint8_t, typename = uint16_t, typename = uint32_t,
-            typename = uint64_t>
+  template <typename T>
   void insert(T toInsert, uint32_t before, uint32_t nnofBits) {
+    static_assert(
+        std::is_integral<T>::value && std::is_unsigned<T>::value && !std::is_same<T, bool>::value,
+        "Can only insert unsigned integer types");
     // basic error handling
     iloAssertWithInsertException(before <= nofBits(), "Insert position is out of range.");
 
