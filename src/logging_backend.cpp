@@ -87,9 +87,12 @@ amm-info@iis.fraunhofer.de
 #if defined(WIN32) || defined(_WIN32)
 #pragma warning(disable : 4996)
 #define __func__ __FUNCTION__
-
-#define NOMINMAX             // Disables conflicting min/max def from Windows.h
+#ifndef NOMINMAX
+#define NOMINMAX  // Disables conflicting min/max def from windows.h
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN  // Disables some rarely used includes in windows.h
+#endif
 #include <windows.h>
 #pragma comment(lib, "advapi32.lib")
 #endif

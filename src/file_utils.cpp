@@ -85,8 +85,12 @@ amm-info@iis.fraunhofer.de
 #include <fstream>
 
 #if defined(WIN32) || defined(_WIN32)
-#define NOMINMAX             // Disables conflicting min/max def from Windows.h
+#ifndef NOMINMAX
+#define NOMINMAX  // Disables conflicting min/max def from windows.h
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN  // Disables some rarely used includes in windows.h
+#endif
 #include <windows.h>
 #endif
 
