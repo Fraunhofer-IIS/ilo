@@ -107,10 +107,12 @@ CLogger& CLogger::instance() {
   return s_instance;
 }
 
-void CLogger::redirect_to_file(const std::string& fname, bool append) {
+void CLogger::redirect_to_file(const std::string& fname, bool append) try {
   m_fileWriter = ilo::make_unique<CAsyncFileWriter>(fname, append);
   m_enableSystemLog.store(false);
   m_disableLogging.store(false);
+} catch (const std::exception& err) {
+  ILO_LOG_ERROR("Failed to open log file, falling back to previous log output: %s", err.what());
 }
 
 void CLogger::redirect_to_console() {
