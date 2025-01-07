@@ -161,14 +161,16 @@ ScopeLogger::~ScopeLogger() {
   }
 }
 
-bool ScopeLogger::add_frame(LineType& line, int& write_at, const char* format, va_list args) const {
-  if (write_at + 1 < static_cast<int>(line.size())) {
+bool ScopeLogger::add_frame(LineType& line, size_t& write_at, const char* format,
+                            va_list args) const {
+  if ((write_at + 1U) < line.size()) {
     line[write_at++] = ' ';
 
     auto written = xsnprintf(line.data() + write_at, line.size() - write_at, "%s (", func);
 
     if (counter_update_and_space_left(line, written, write_at)) {
-      written = vsnprintf(line.data() + write_at, line.size() - write_at, format, args);
+      written = static_cast<size_t>(
+          vsnprintf(line.data() + write_at, line.size() - write_at, format, args));
 
       if (counter_update_and_space_left(line, written, write_at)) {
         return true;
@@ -179,16 +181,15 @@ bool ScopeLogger::add_frame(LineType& line, int& write_at, const char* format, v
   return false;
 }
 
-bool ScopeLogger::add_brackets(LineType& line, int& write_at) const {
+bool ScopeLogger::add_brackets(LineType& line, size_t& write_at) const {
   auto written = xsnprintf(line.data() + write_at, line.size() - write_at, ") {");
   return counter_update_and_space_left(line, written, write_at);
 }
 
-bool ScopeLogger::add_closing(LineType& line, int& write_at) const {
-  if (write_at + 1 < static_cast<int>(line.size())) {
-    int written;
+bool ScopeLogger::add_closing(LineType& line, size_t& write_at) const {
+  if ((write_at + 1U) < line.size()) {
     line[write_at++] = ' ';
-    written = xsnprintf(line.data() + write_at, line.size() - write_at, "%s }", func);
+    size_t written = xsnprintf(line.data() + write_at, line.size() - write_at, "%s }", func);
     return counter_update_and_space_left(line, written, write_at);
   }
   return false;
@@ -197,8 +198,7 @@ bool ScopeLogger::add_closing(LineType& line, int& write_at) const {
 void ScopeLogger::print_entry(const char* format, va_list args) const {
   LineType line;
 
-  int write_at = 0;
-
+  size_t write_at = 0;
   add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
       add_component_category(line, write_at, comp, "I") &&
       add_frame(line, write_at, format, args) && add_brackets(line, write_at);
@@ -209,7 +209,7 @@ void ScopeLogger::print_entry(const char* format, va_list args) const {
 void ScopeLogger::print_exit() const {
   LineType line;
 
-  int write_at = 0;
+  size_t write_at = 0;
   add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
       add_component_category(line, write_at, comp, "I") && add_closing(line, write_at);
 

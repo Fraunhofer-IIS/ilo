@@ -347,9 +347,9 @@ class CBitBuffer {
     }
 
     if (writePosBefore < before) {
-      seek(writePosBefore, ilo::EPosType::begin);
+      seek(static_cast<int32_t>(writePosBefore), ilo::EPosType::begin);
     } else if (writePosBefore >= before) {
-      seek(writePosBefore + nnofBits, ilo::EPosType::begin);
+      seek(static_cast<int32_t>(writePosBefore + nnofBits), ilo::EPosType::begin);
     }
   }
 

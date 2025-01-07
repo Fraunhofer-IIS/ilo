@@ -101,12 +101,12 @@ SUuid SUuid::s_createUuid() {
   }
 
   std::array<uint8_t, 16> uuid;
-  for (int i = 0; i < 4; ++i) {
+  for (uint32_t i = 0; i < 4; ++i) {
     uint32_t value = static_cast<uint32_t>((*s_rnd)());
-    uuid[(i * 4) + 0] = static_cast<uint8_t>(value);
-    uuid[(i * 4) + 1] = static_cast<uint8_t>(value >> 8);
-    uuid[(i * 4) + 2] = static_cast<uint8_t>(value >> 16);
-    uuid[(i * 4) + 3] = static_cast<uint8_t>(value >> 24);
+    uuid[(i * 4U) + 0U] = static_cast<uint8_t>(value);
+    uuid[(i * 4U) + 1U] = static_cast<uint8_t>(value >> 8);
+    uuid[(i * 4U) + 2U] = static_cast<uint8_t>(value >> 16);
+    uuid[(i * 4U) + 3U] = static_cast<uint8_t>(value >> 24);
   }
 
   return SUuid(uuid);

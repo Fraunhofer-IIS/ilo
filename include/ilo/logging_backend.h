@@ -89,6 +89,7 @@ amm-info@iis.fraunhofer.de
 
 // System includes
 #include <array>
+#include <cstdint>
 #include <cstdio>
 #include <chrono>
 #include <sstream>
@@ -255,16 +256,16 @@ class CLogger {
   std::atomic<bool> m_disableLogging{false};
 };
 
-inline int xsnprintf(char* buffer, size_t count, const char* format, ...) {
+inline size_t xsnprintf(char* buffer, size_t count, const char* format, ...) {
   va_list args;
   va_start(args, format);
   auto written = vsnprintf(buffer, count, format, args);
   va_end(args);
 
   if (-1 == written) {
-    return static_cast<int>(count) + 1;
+    return count + 1U;
   }
-  return static_cast<int>(written);
+  return static_cast<size_t>(written);
 }
 
 // All logs use this function in the end
@@ -288,8 +289,8 @@ inline void indicate_overlength(line_type& line) {
 }
 
 template <class line_type>
-inline bool counter_update_and_space_left(line_type& line, int written, int& write_at) {
-  if (written > static_cast<int>(line.size() - write_at)) {
+inline bool counter_update_and_space_left(line_type& line, size_t written, size_t& write_at) {
+  if (written > (line.size() - write_at)) {
     indicate_overlength(line);
     return false;
   }
@@ -298,11 +299,11 @@ inline bool counter_update_and_space_left(line_type& line, int written, int& wri
 }
 
 template <class line_type>
-inline bool add_date_string(line_type& line, int& write_at) {
+inline bool add_date_string(line_type& line, size_t& write_at) {
   using namespace std;
   using namespace std::chrono;
 
-  if (static_cast<int>(line.size()) > write_at) {
+  if (line.size() > write_at) {
     auto now = system_clock::now();
     std::time_t tmp = system_clock::to_time_t(now);
     struct tm now_c;
@@ -326,9 +327,9 @@ inline bool add_date_string(line_type& line, int& write_at) {
 }
 
 template <class line_type>
-inline bool add_thread_id_string(line_type& line, int& write_at) {
+inline bool add_thread_id_string(line_type& line, size_t& write_at) {
   using namespace std;
-  if (static_cast<int>(line.size()) > write_at) {
+  if (line.size() > write_at) {
     ostringstream thread_id;
     thread_id << this_thread::get_id();
     auto written =
@@ -341,10 +342,10 @@ inline bool add_thread_id_string(line_type& line, int& write_at) {
 }
 
 template <class line_type>
-inline bool add_component_category(line_type& line, int& write_at, const char* Component,
+inline bool add_component_category(line_type& line, size_t& write_at, const char* Component,
                                    const char* Category) {
   using namespace std;
-  if (static_cast<int>(line.size()) > write_at) {
+  if (line.size() > write_at) {
     auto written =
         xsnprintf(line.data() + write_at, line.size() - write_at, " %s:%s", Component, Category);
     return counter_update_and_space_left(line, written, write_at);
@@ -364,23 +365,24 @@ inline const char* basename(const char* path) {
 template <class line_type = LineType>
 inline void log_function(const char* Component, const char* Category, const char* format, ...) {
   using namespace std;
-  line_type line;
-  int write_at = 0;
 
   if (CLogger::instance().isLoggingDisabled()) {
     // Skip assembling the log message if it is not going to be written
     return;
   }
 
+  line_type line;
+  size_t write_at = 0;
   bool success = add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
                  add_component_category(line, write_at, Component, Category);
 
-  if (success && (write_at + 1 < static_cast<int>(line.size()))) {
+  if (success && (write_at + 1U) < line.size()) {
     line[write_at++] = ' ';
 
     va_list args;
     va_start(args, format);
-    auto written = vsnprintf(line.data() + write_at, line.size() - write_at, format, args);
+    auto written = static_cast<size_t>(
+        vsnprintf(line.data() + write_at, line.size() - write_at, format, args));
     va_end(args);
 
     counter_update_and_space_left(line, written, write_at);
@@ -407,33 +409,34 @@ inline std::string format_to_string(const char* format, ...) {
 
 template <class line_type = LineType>
 inline bool log_assert(const char* component, const char* predicate, const char* filename,
-                       int lineNumber, const char* format, ...) {
+                       size_t lineNumber, const char* format, ...) {
   using namespace std;
-  line_type line;
-  int write_at = 0;
 
   if (CLogger::instance().isLoggingDisabled()) {
     // Skip assembling the log message if it is not going to be written
     return true;
   }
 
+  line_type line;
+  size_t write_at = 0;
   bool success = add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
                  add_component_category(line, write_at, component, "E");
 
-  if (success && (write_at + 1 < static_cast<int>(line.size()))) {
+  if (success && (write_at + 1U) < line.size()) {
     line[write_at++] = ' ';
 
     auto written = xsnprintf(line.data() + write_at, line.size() - write_at,
-                             "Assert failed: '%s' in file %s, line %d ", predicate,
+                             "Assert failed: '%s' in file %s, line %zu ", predicate,
                              basename(filename), lineNumber);
 
     if (counter_update_and_space_left(line, written, write_at)) {
       va_list args;
       va_start(args, format);
-      written = vsnprintf(line.data() + write_at, line.size() - write_at, format, args);
+      written = static_cast<size_t>(
+          vsnprintf(line.data() + write_at, line.size() - write_at, format, args));
       va_end(args);
 
-      if (written >= static_cast<int>(line.size()) - write_at) {
+      if (written >= line.size() - write_at) {
         indicate_overlength(line);
       }
     }
@@ -460,9 +463,9 @@ struct ScopeLogger {
   virtual ~ScopeLogger();
 
  protected:
-  bool add_frame(LineType& line, int& write_at, const char* format, va_list args) const;
-  bool add_brackets(LineType& line, int& write_at) const;
-  bool add_closing(LineType& line, int& write_at) const;
+  bool add_frame(LineType& line, size_t& write_at, const char* format, va_list args) const;
+  bool add_brackets(LineType& line, size_t& write_at) const;
+  bool add_closing(LineType& line, size_t& write_at) const;
   void print_entry(const char* format, va_list args) const;
   void print_exit() const;
 
@@ -508,7 +511,7 @@ struct ScopeLoggerRet : ScopeLogger {
       return;
     }
 
-    int write_at = 0;
+    size_t write_at = 0;
     add_date_string(line, write_at) && add_thread_id_string(line, write_at) &&
         add_return_value_closing(line, write_at);
 
@@ -516,14 +519,13 @@ struct ScopeLoggerRet : ScopeLogger {
   }
 
   template <class line_type>
-  bool add_return_value_closing(line_type& line, int& write_at) const {
-    if (write_at + 1 < static_cast<int>(line.size())) {
-      int written;
+  bool add_return_value_closing(line_type& line, size_t& write_at) const {
+    if ((write_at + 1U) < line.size()) {
       line[write_at++] = ' ';
       std::ostringstream retval_str;
       retval_str << retval;
-      written = xsnprintf(line.data() + write_at, line.size() - write_at, "%s -> (%s) }", func,
-                          retval_str.str().c_str());
+      size_t written = xsnprintf(line.data() + write_at, line.size() - write_at, "%s -> (%s) }",
+                                 func, retval_str.str().c_str());
 
       return counter_update_and_space_left(line, written, write_at);
     }

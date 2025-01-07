@@ -335,7 +335,7 @@ class CBitParser {
   T unsigned_read(uint32_t nnofBits) {
     bool isUint8 = std::is_same<T, uint8_t>::value;
     if (isUint8) {
-      return readUint8(nnofBits);
+      return static_cast<T>(readUint8(nnofBits));
     }
 
     // Basic error handling
@@ -343,18 +343,17 @@ class CBitParser {
     iloAssertWithReadException(nnofBits <= maxNumBits,
                                "Number of bits does not fit into the given variable");
 
-    T result = 0;
     // The bits which are in the first 8bit-field - all remaining can be added with 8 bit and
     // shift...
     uint32_t nonAlignedBits = nnofBits % 8;
     // Read the first non aligned bits:
-    result = read<uint8_t>(nonAlignedBits);
+    T result = static_cast<T>(read<uint8_t>(nonAlignedBits));
 
     // Now we need a bit counter to decrease the number of bits to be written
     uint32_t bitCounter = nnofBits - nonAlignedBits;
     while (bitCounter >= 8) {
       bitCounter -= 8;
-      result = (result << 8) | read<uint8_t>(8);
+      result = static_cast<T>((result << 8) | read<uint8_t>(8));
     }
 
     return result;
@@ -369,21 +368,19 @@ class CBitParser {
       return 0;
     }
 
-    // Temporal value to read into
-    T tmpRead;
     // Mask for signed variable
     unsigned_T mask = static_cast<unsigned_T>(static_cast<uint64_t>(0xFFFFFFFFFFFFFFFF)
                                               << static_cast<uint32_t>(nnofBits - 1));
 
     // Do actual read operation
-    tmpRead = static_cast<T>(read<unsigned_T>(nnofBits));
+    auto tmpRead = read<unsigned_T>(nnofBits);
 
     // Check for sign
     if ((tmpRead & mask) != 0) {
       tmpRead |= mask;
     }
 
-    return tmpRead;
+    return static_cast<T>(tmpRead);
   }
 
  private:

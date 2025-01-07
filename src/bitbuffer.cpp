@@ -151,7 +151,7 @@ void CBitBuffer::append(const ilo::ByteBuffer& toAppend) {
     write(toWrite, 8u);
   }
 
-  seek(writePosBeforeBits, ilo::EPosType::begin);
+  seek(static_cast<int32_t>(writePosBeforeBits), ilo::EPosType::begin);
 }
 
 void CBitBuffer::erase(uint32_t firstBit, uint32_t nnofBits) {
@@ -163,7 +163,7 @@ void CBitBuffer::erase(uint32_t firstBit, uint32_t nnofBits) {
   ILO_ASSERT_WITH(lastBit <= nofBits(), EraseException, "The range to be erased is invalid.");
 
   CBitParser parser(m_buffer, nofBits());
-  parser.seek(lastBit, ilo::EPosType::begin);
+  parser.seek(static_cast<int32_t>(lastBit), ilo::EPosType::begin);
 
   uint32_t toReadBits = nofBits() - lastBit;
 
@@ -196,11 +196,11 @@ void CBitBuffer::erase(uint32_t firstBit, uint32_t nnofBits) {
   }
 
   if (writePosBeforeBit < firstBit) {
-    seek(writePosBeforeBit, ilo::EPosType::begin);
+    seek(static_cast<int32_t>(writePosBeforeBit), ilo::EPosType::begin);
   } else if (writePosBeforeBit >= lastBit) {
-    seek(writePosBeforeBit - nnofBits, ilo::EPosType::begin);
+    seek(static_cast<int32_t>(writePosBeforeBit - nnofBits), ilo::EPosType::begin);
   } else {
-    seek(firstBit, ilo::EPosType::begin);
+    seek(static_cast<int32_t>(firstBit), ilo::EPosType::begin);
   }
 }
 
@@ -236,7 +236,7 @@ void CBitBuffer::resize(uint32_t newSizeInBits) {
 
     if ((newSizeInBits % 8u) != 0) {
       uint32_t overhead = 8u - newSizeInBits % 8u;
-      uint8_t mask = 0xFFu << overhead;
+      uint8_t mask = static_cast<uint8_t>(0xFFu << overhead);
 
       m_buffer[newIter] &= mask;
       newIter++;
@@ -252,7 +252,7 @@ void CBitBuffer::resize(uint32_t newSizeInBits) {
   }
 
   m_nofvalidBits = newSizeInBits;
-  seek(std::min(writeIterPos, m_nofvalidBits), EPosType::begin);
+  seek(static_cast<int32_t>(std::min(writeIterPos, m_nofvalidBits)), EPosType::begin);
 }
 
 void CBitBuffer::seek(int32_t bitposition, ilo::EPosType fromPosition) const {
@@ -369,7 +369,8 @@ void CBitBuffer::writeIntern(uint8_t toWrite, uint32_t nnofBits) {
   mask = static_cast<uint16_t>(mask << shiftvalue);  // shift to start for writing bits
   mask = ~mask;
 
-  uint16_t shiftBuffer = static_cast<uint16_t>(toWrite & (0xFFu >> (8 - nnofBits))) << shiftvalue;
+  uint16_t shiftBuffer =
+      static_cast<uint16_t>(uint32_t{toWrite & (0xFFu >> (8 - nnofBits))} << shiftvalue);
 
   // write first value:
   m_buffer[m_writeIterBytes] = static_cast<uint8_t>(m_buffer[m_writeIterBytes] & (mask >> 8U));
@@ -381,8 +382,10 @@ void CBitBuffer::writeIntern(uint8_t toWrite, uint32_t nnofBits) {
 
   // write second value if needed:
   if (~mask & 0xFFu) {
-    m_buffer[m_writeIterBytes + 1] = m_buffer[m_writeIterBytes + 1] & (mask & 0xFFu);
-    m_buffer[m_writeIterBytes + 1] = m_buffer[m_writeIterBytes + 1] | (shiftBuffer & 0xFFu);
+    m_buffer[m_writeIterBytes + 1] =
+        static_cast<uint8_t>(m_buffer[m_writeIterBytes + 1] & (mask & 0xFFu));
+    m_buffer[m_writeIterBytes + 1] =
+        static_cast<uint8_t>(m_buffer[m_writeIterBytes + 1] | (shiftBuffer & 0xFFu));
   }
 
   // Should only happen if we write byte aligned

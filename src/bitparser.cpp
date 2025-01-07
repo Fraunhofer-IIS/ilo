@@ -142,8 +142,8 @@ uint8_t CBitParser::readUint8(uint32_t nnofBits) {
     // move mask to last read bit ptr
     mask = mask >> m_localReadBits;
     // fill shift buffer:
-    uint16_t shiftBuffer =
-        static_cast<uint16_t>(m_buffer[m_readIter]) << 8 | m_buffer[m_readIter + 1];
+    uint16_t shiftBuffer = static_cast<uint16_t>(
+        (static_cast<uint16_t>(m_buffer[m_readIter]) << 8U) | m_buffer[m_readIter + 1]);
     // mask out already read bits:
     shiftBuffer = shiftBuffer & mask;
     // move the essential bits to correct position:
@@ -209,7 +209,7 @@ std::ostream& operator<<(std::ostream& s, CBitParser bitparser) {
   while ((reader = bitparser.read<uint32_t>(1)) != 0) {
     s << reader;
   }
-  bitparser.seek(old_pos, ilo::EPosType::begin);
+  bitparser.seek(static_cast<int32_t>(old_pos), ilo::EPosType::begin);
 
   return s;
 }

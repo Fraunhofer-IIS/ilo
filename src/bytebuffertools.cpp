@@ -99,8 +99,7 @@ uint64_t readUint64(const ByteBuffer& buffer, ByteBuffer::const_iterator& positi
   highValue = readUint32(buffer, position);
   lowValue = readUint32(buffer, position);
 
-  uint64_t retval = static_cast<uint64_t>(highValue) << 32 | static_cast<uint64_t>(lowValue);
-  return retval;
+  return static_cast<uint64_t>(highValue) << 32 | static_cast<uint64_t>(lowValue);
 }
 
 int64_t readInt64(const ByteBuffer& buffer, ByteBuffer::const_iterator& position) {
@@ -111,8 +110,8 @@ uint32_t readUint32(const ByteBuffer& buffer, ByteBuffer::const_iterator& positi
   if (buffer.begin() > position || buffer.end() - position < 4) {
     throw std::out_of_range("Read position out of bounds");
   }
-  uint32_t retval =
-      (*position << 24) | (*(position + 1) << 16) | (*(position + 2) << 8) | (*(position + 3));
+  uint32_t retval = static_cast<uint32_t>((*position << 24) | (*(position + 1) << 16) |
+                                          (*(position + 2) << 8) | (*(position + 3)));
 
   position += 4;
   return retval;
@@ -132,7 +131,8 @@ uint32_t readUint24(const ByteBuffer& buffer, ByteBuffer::const_iterator& positi
   if (buffer.begin() > position || buffer.end() - position < 3) {
     throw std::out_of_range("Read position out of bounds");
   }
-  uint32_t retval = (*position << 16) | (*(position + 1) << 8) | (*(position + 2));
+  uint32_t retval =
+      static_cast<uint32_t>((*position << 16) | (*(position + 1) << 8) | (*(position + 2)));
 
   position += 3;
   return retval;
@@ -292,7 +292,8 @@ int64_t readInt64(ByteBuffer::const_iterator& begin, const ByteBuffer::const_ite
 uint32_t readUint32(ByteBuffer::const_iterator& begin, const ByteBuffer::const_iterator& end) {
   ILO_ASSERT_WITH(end - begin >= 4, std::out_of_range, "Read position out of bounds");
 
-  uint32_t retval = (*begin << 24) | (*(begin + 1) << 16) | (*(begin + 2) << 8) | (*(begin + 3));
+  uint32_t retval = static_cast<uint32_t>((*begin << 24) | (*(begin + 1) << 16) |
+                                          (*(begin + 2) << 8) | (*(begin + 3)));
 
   begin += 4;
   return retval;
@@ -310,7 +311,7 @@ int32_t readInt32(ByteBuffer::const_iterator& begin, const ByteBuffer::const_ite
 
 uint32_t readUint24(ByteBuffer::const_iterator& begin, const ByteBuffer::const_iterator& end) {
   ILO_ASSERT_WITH(end - begin >= 3, std::out_of_range, "Read position out of bounds");
-  uint32_t retval = (*begin << 16) | (*(begin + 1) << 8) | (*(begin + 2));
+  uint32_t retval = static_cast<uint32_t>((*begin << 16) | (*(begin + 1) << 8) | (*(begin + 2)));
 
   begin += 3;
   return retval;
@@ -555,9 +556,9 @@ void writeIsoLang(ByteBuffer& buffer, ByteBuffer::iterator& position, const IsoL
   }
 
   uint16_t tmp = 0;
-  tmp = (uint16_t)(valueToWrite.at(0) - 0x60) << 10 | tmp;
-  tmp = (uint16_t)(valueToWrite.at(1) - 0x60) << 5 | tmp;
-  tmp = (uint16_t)(valueToWrite.at(2) - 0x60) | tmp;
+  tmp = static_cast<uint16_t>(((valueToWrite.at(0) - 0x60) << 10U) | tmp);
+  tmp = static_cast<uint16_t>(((valueToWrite.at(1) - 0x60) << 5) | tmp);
+  tmp = static_cast<uint16_t>((valueToWrite.at(2) - 0x60) | tmp);
 
   writeUint16(buffer, position, tmp);
 }
@@ -568,8 +569,7 @@ void writeString(ByteBuffer& buffer, ByteBuffer::iterator& position,
       static_cast<size_t>(buffer.end() - position) <= valueToWrite.size()) {
     throw std::out_of_range("Write position out of bounds");
   }
-  std::copy(valueToWrite.cbegin(), valueToWrite.cend(), position);
-  position += valueToWrite.size();
+  position = std::copy(valueToWrite.cbegin(), valueToWrite.cend(), position);
   *position++ = 0;
 }
 
@@ -723,9 +723,9 @@ void writeIsoLang(ByteBuffer::iterator& begin, const ByteBuffer::iterator& end,
   }
 
   uint16_t tmp = 0;
-  tmp = (uint16_t)(valueToWrite.at(0) - 0x60) << 10 | tmp;
-  tmp = (uint16_t)(valueToWrite.at(1) - 0x60) << 5 | tmp;
-  tmp = (uint16_t)(valueToWrite.at(2) - 0x60) | tmp;
+  tmp = static_cast<uint16_t>(((valueToWrite.at(0) - 0x60) << 10) | tmp);
+  tmp = static_cast<uint16_t>(((valueToWrite.at(1) - 0x60) << 5) | tmp);
+  tmp = static_cast<uint16_t>((valueToWrite.at(2) - 0x60) | tmp);
 
   writeUint16(begin, end, tmp);
 }
@@ -735,8 +735,7 @@ void writeString(ByteBuffer::iterator& begin, const ByteBuffer::iterator& end,
   ILO_ASSERT_WITH(end - begin >= static_cast<int32_t>(valueToWrite.size() + 1), std::out_of_range,
                   "Write position out of bounds");
 
-  std::copy(valueToWrite.cbegin(), valueToWrite.cend(), begin);
-  begin += valueToWrite.size();
+  begin = std::copy(valueToWrite.cbegin(), valueToWrite.cend(), begin);
   *begin++ = 0;
 }
 

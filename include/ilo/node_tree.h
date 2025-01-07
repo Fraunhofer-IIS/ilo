@@ -92,6 +92,7 @@ amm-info@iis.fraunhofer.de
 #include <memory>
 #include <cstdint>
 #include <numeric>
+#include <stdexcept>
 #include <utility>
 
 // System includes
@@ -138,7 +139,7 @@ struct Node {
     if (children.size() <= at) {
       throw std::runtime_error("tree index out of bounds");
     }
-    children.erase(children.begin() + at);
+    children.erase(children.begin() + static_cast<std::ptrdiff_t>(at));
   }
 
   //! Get the number of direct children of this node
