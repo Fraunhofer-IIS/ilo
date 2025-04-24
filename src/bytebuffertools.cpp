@@ -220,7 +220,7 @@ IsoLang readIsoLang(const ByteBuffer& buffer, ByteBuffer::const_iterator& positi
 
 std::string readString(const ByteBuffer& buffer, ByteBuffer::const_iterator& position,
                        uint64_t maxLength) {
-  ILO_ASSERT_WITH(buffer.begin() <= position && buffer.end() - position > 0, std::out_of_range,
+  ILO_ASSERT_WITH(buffer.begin() <= position && buffer.end() > position, std::out_of_range,
                   "Read position out of bounds");
 
   auto begin = position;
@@ -336,7 +336,7 @@ int16_t readInt16(ByteBuffer::const_iterator& begin, const ByteBuffer::const_ite
 }
 
 uint8_t readUint8(ByteBuffer::const_iterator& begin, const ByteBuffer::const_iterator& end) {
-  ILO_ASSERT_WITH(end - begin, std::out_of_range, "Read position out of bounds");
+  ILO_ASSERT_WITH(end > begin, std::out_of_range, "Read position out of bounds");
 
   uint8_t retval = *begin++;
   return retval;
@@ -395,7 +395,7 @@ IsoLang readIsoLang(ByteBuffer::const_iterator& begin, const ByteBuffer::const_i
 
 std::string readString(ByteBuffer::const_iterator& begin, const ByteBuffer::const_iterator& end,
                        uint64_t maxLength) {
-  ILO_ASSERT_WITH(end - begin > 0, std::out_of_range, "Read position out of bounds");
+  ILO_ASSERT_WITH(end > begin, std::out_of_range, "Read position out of bounds");
 
   auto str_begin = begin;
   while (*begin != '\0' &&
@@ -407,7 +407,7 @@ std::string readString(ByteBuffer::const_iterator& begin, const ByteBuffer::cons
 
 std::string readStringNonStrict(ByteBuffer::const_iterator& begin,
                                 const ByteBuffer::const_iterator& end, uint64_t maxLength) {
-  ILO_ASSERT_WITH(end - begin > 0, std::out_of_range, "Read position out of bounds");
+  ILO_ASSERT_WITH(end > begin, std::out_of_range, "Read position out of bounds");
 
   auto str_begin = begin;
   while (*begin != '\0' &&
@@ -664,13 +664,13 @@ void writeFloat(ByteBuffer::iterator& begin, const ByteBuffer::iterator& end, fl
 
 void writeFloatLE(ByteBuffer::iterator& begin, const ByteBuffer::iterator& end,
                   float valueToWrite) {
+  ILO_ASSERT_WITH(end - begin >= 4, std::out_of_range, "Write position out of bounds");
 #ifdef _MSC_VER
   errno_t err;
   ILO_ASSERT(
       (err = memcpy_s(&begin[0], end - begin, reinterpret_cast<uint8_t*>(&valueToWrite), 4)) == 0,
       "Writing float value failed: %i", err);
 #else
-  ILO_ASSERT_WITH(end - begin >= 4, std::out_of_range, "Write position out of bounds");
   memcpy(&begin[0], &valueToWrite, 4);
 #endif
   begin += 4;
