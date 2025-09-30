@@ -1,12 +1,11 @@
 cmake_minimum_required( VERSION 3.16 )
-include(FetchContent)
 
 if(ilo_included)
   return()
 endif(ilo_included)
 set(ilo_included true)
 
-project(ilo VERSION 1.0.0)
+project(ilo VERSION 2.0.0)
 
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -26,3 +25,5 @@ target_include_directories(ilo PUBLIC
 if(ilo_BUILD_DOC)
   add_subdirectory(doc)
 endif()
+
+
