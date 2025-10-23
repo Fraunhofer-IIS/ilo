@@ -124,14 +124,15 @@ amm-info@iis.fraunhofer.de
 #define ILO_LOG_INFO(...) ilo::impl::log_function(LOG_COMPONENT, "I", __VA_ARGS__)
 
 //! Macro to log stuff every milli seconds - use it like printf
-#define ILO_LOG_EVERY(ms, ...)                                                            \
-  {                                                                                       \
-    using namespace std::chrono;                                                          \
-    static time_point<high_resolution_clock> last;                                        \
-    if (duration_cast<milliseconds>(high_resolution_clock::now() - last).count() >= ms) { \
-      ilo::impl::log_function(LOG_COMPONENT, "R", __VA_ARGS__);                           \
-      last = high_resolution_clock::now();                                                \
-    }                                                                                     \
+#define ILO_LOG_EVERY(ms, ...)                                  \
+  {                                                             \
+    static std::chrono::high_resolution_clock::time_point last; \
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(  \
+            std::chrono::high_resolution_clock::now() - last)   \
+            .count() >= ms) {                                   \
+      ilo::impl::log_function(LOG_COMPONENT, "R", __VA_ARGS__); \
+      last = std::chrono::high_resolution_clock::now();         \
+    }                                                           \
   }
 
 #define ILO_XCONCAT(x, y) x##y
