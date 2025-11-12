@@ -62,3 +62,6 @@ if("${CMAKE_CXX_FLAGS}" MATCHES "unsigned-integer-overflow")
   # There are some unsigned overflow "errors" reported by UBSAN in some libstdc++ files, which we cannot fix
   target_compile_options(ilo PRIVATE "-fsanitize-blacklist=${CMAKE_CURRENT_SOURCE_DIR}/../sanitizer-ignorelist.txt")
 endif()
+
+include(GNUInstallDirs)
+install(TARGETS ilo PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ilo)
