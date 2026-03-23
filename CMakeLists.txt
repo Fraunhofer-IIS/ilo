@@ -6,7 +6,7 @@ endif(ilo_included)
 set(ilo_included true)
 
 project(ilo
-  VERSION 2.0.1
+  VERSION 2.0.2
   DESCRIPTION "Fraunhofer IIS utility library"
   HOMEPAGE_URL "https://github.com/Fraunhofer-IIS/ilo"
   LANGUAGES CXX
