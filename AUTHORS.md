@@ -2,6 +2,7 @@
 - [Bernd Herrmann](https://github.com/bherrmann-iis), Fraunhofer IIS
 - Daniel Stadelmann, Fraunhofer IIS
 - Jochen Issing, Fraunhofer IIS
+- [Jo Jöns](https://github.com/jopejoe1), NixOS
 - Julian Zebelein, Fraunhofer IIS
 - [Moritz Fuchs](https://github.com/mfuchs-iis), Fraunhofer IIS
 - Ziad Shaban, Fraunhofer IIS
