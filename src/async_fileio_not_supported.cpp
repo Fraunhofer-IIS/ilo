@@ -90,6 +90,8 @@ amm-info@iis.fraunhofer.de
 #if defined(WIN32) || defined(_WIN32)
 #include <io.h>
 #include <wchar.h>
+#include <share.h>
+#include <stdlib.h>
 #else
 #include <unistd.h>
 #endif
